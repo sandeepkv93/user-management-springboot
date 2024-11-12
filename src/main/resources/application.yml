@@ -1,0 +1,55 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_management
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none  # Changed from update to none since we're using Flyway
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-on-validation-error: false
+    # Add this to ensure Flyway runs before JPA
+    baseline-version: 0
+    out-of-order: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:dummy-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:dummy-secret}
+            scope:
+              - email
+              - profile
+          github:
+            client-id: ${GITHUB_CLIENT_ID:dummy-id}
+            client-secret: ${GITHUB_CLIENT_SECRET:dummy-secret}
+            scope:
+              - user:email
+              - read:user
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:your_jwt_secret_key_min_256_bits_long_for_security_purpose_please_change_in_production}
+    access-token-expiration: 3600000      # 1 hour
+    refresh-token-expiration: 2592000000  # 30 days
+  aws:
+    s3:
+      endpoint: http://localhost:4566
+      region: us-east-1
+      bucket-name: user-profiles
+      access-key: test
+      secret-key: test

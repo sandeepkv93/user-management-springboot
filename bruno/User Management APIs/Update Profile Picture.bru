@@ -1,0 +1,23 @@
+meta {
+  name: Update Profile Picture
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/users/me/profile-picture
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:multipart-form {
+  file: @file(path/to/picture.jpg)
+}
+
+docs {
+  Update user profile picture
+}

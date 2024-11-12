@@ -1,0 +1,15 @@
+meta {
+  name: GitHub OAuth2 Login
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/oauth2/authorization/github
+  body: none
+  auth: none
+}
+
+docs {
+  Initiate GitHub OAuth2 login flow
+}

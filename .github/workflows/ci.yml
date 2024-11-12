@@ -1,0 +1,49 @@
+name: User Management Service CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * *' # Run daily at 5 AM
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn clean install
+    - name: Run tests and generate coverage report
+      run: |
+        mvn test -Dspring.profiles.active=test -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+    - uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: target/site/jacoco/index.html
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        env_vars: OS,JAVA
+        fail_ci_if_error: true
+    - name: Update README
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        # Get the current build status
+        BUILD_STATUS=$(if [ ${{ job.status }} = 'success' ]; then echo '[![Build Status](https://github.com/sandeepkv93/user-management-springboot/actions/workflows/ci.yml/badge.svg)](https://github.com/sandeepkv93/user-management-springboot/actions/workflows/ci.yml)'; else echo '[![Build Status](https://github.com/sandeepkv93/user-management-springboot/actions/workflows/ci.yml/badge.svg)](https://github.com/sandeepkv93/user-management-springboot/actions/workflows/ci.yml)'; fi)
+
+        # Get the current code coverage
+        COVERAGE=$(curl -s https://codecov.io/gh/sandeepkv93/user-management-springboot/branch/main/graphs/badge.svg | sed 's/.*\([![-]*\)$/\1/;')
+
+        # Update the README
+        sed -i "1i$BUILD_STATUS\n$COVERAGE\n\n" README.md
